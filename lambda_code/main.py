@@ -10,7 +10,7 @@ def html_result(result):
     return html
 
 def google_search(query = '"cancer" "aws" devops -careers -jobs'):
-    results = list(search(query=query, lang='en', num=10, stop=10, pause=1, only_standard=True))
+    query_results = list(search(query=query, lang='en', num=10, stop=10, pause=1, only_standard=True))
 
     return html_result(query_results)
 
