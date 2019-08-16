@@ -37,7 +37,6 @@ tasks:
     - ./example-{{.GIT_COMMIT}}.zip
     generates:
     - ./example-{{.GIT_COMMIT}}.zip
-    method: checksum
 
   post_lambda:
     desc: Post lambda function to s3
