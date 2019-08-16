@@ -11,7 +11,7 @@ def html_result(result):
 def google_search(query = '"cancer" "aws" devops -careers -jobs'):
     query_results = list(search(query=query, lang='en', num=10, stop=10, pause=1, only_standard=True))
 
-    return html_result(query_results)
+    return html_result(query_results).strip('"')
 
 def search_handler(event, context):
     if event['httpMethod'] == 'GET':
