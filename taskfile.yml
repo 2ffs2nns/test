@@ -1,0 +1,80 @@
+version: '2'
+
+vars:
+  BUCKET_NAME: et-serverless-example
+  GIT_COMMIT: {sh: git log -n 1 --format=%h}
+
+tasks:
+  default:
+    cmds:
+    - task: ci
+
+  build:
+    desc: |
+      Run terraform init/apply cmds to "build" the project
+      and deploy a AWS apigateway and lambda function.
+    deps: [create_s3, post_lambda]
+    cmds:
+    - terraform init
+    - terraform apply -var git_hash={{.GIT_COMMIT}} -auto-approve 
+
+  create_s3:
+    desc: Create a s3 bucket
+    cmds: 
+    - aws s3api create-bucket --bucket {{.BUCKET_NAME}} --region=us-east-1 --query Location > {{.BUCKET_NAME}}.txt
+    sources:
+    - ./{{.BUCKET_NAME}}.txt 
+    generates:
+    - ./{{.BUCKET_NAME}}.txt
+
+  package_lambda:
+    desc: Package up the python dependencies
+    cmds:
+    - cd lambda_code && pip install --target ./package google --upgrade
+    - cd lambda_code/package && zip -r9 ../../example-{{.GIT_COMMIT}}.zip .
+    - cd lambda_code && zip -g ../example-{{.GIT_COMMIT}}.zip main.py
+    sources:
+    - ./example-{{.GIT_COMMIT}}.zip
+    generates:
+    - ./example-{{.GIT_COMMIT}}.zip
+    method: checksum
+
+  post_lambda:
+    desc: Post lambda function to s3
+    deps: [create_s3, package_lambda]
+    cmds:
+    - aws s3 cp example-{{.GIT_COMMIT}}.zip s3://{{.BUCKET_NAME}}/{{.GIT_COMMIT}}/example.zip
+    sources:
+    - ./example-{{.GIT_COMMIT}}.zip
+    generates:
+    - ./example-{{.GIT_COMMIT}}.zip
+    method: checksum
+
+  test:
+    desc: |
+      Test terraform .tf files including integration tests.
+      The "{{.API_GATEWAY_URL}}" var is written by taskvars.tf
+      and made available by Taskvars.yml for a quick/dirty
+      integration test. Test tools:
+
+      terraform fmt - keeps tf files consistent
+      tflint - linter for AWS provider-specific issues
+      terraform validate - syntax checker
+      curl - quick/dirty integration test utilizing dynamic variables
+    cmds:
+    - terraform fmt
+    - docker run --rm -v $(pwd):/data -t wata727/tflint 
+    - terraform validate -var git_hash={{.GIT_COMMIT}} -check-variables=true
+    - curl --connect-timeout 300 --fail {{.API_GATEWAY_URL}}
+
+  ci:
+    desc: Run build, test, destroy tasks
+    cmds:
+    - task: build
+    - task: test
+    - task: destroy
+
+  destroy:
+    desc: Teardown tf infrastructure
+    cmds:
+    - terraform destroy -var git_hash={{.GIT_COMMIT}} -force 
