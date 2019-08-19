@@ -6,7 +6,7 @@ resource "aws_lambda_function" "example" {
   function_name = "ServerlessExample"
 
   # The bucket name as created earlier with "aws s3api create-bucket"
-  s3_bucket = "et-serverless-example"
+  s3_bucket = "${var.s3_bucket}"
   s3_key    = "${var.git_hash}/example.zip"
 
   handler = "main.search_handler"

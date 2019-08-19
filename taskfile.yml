@@ -1,7 +1,7 @@
 version: '2'
 
 vars:
-  BUCKET_NAME: et-serverless-example
+  BUCKET_NAME: lambda_test_code
   GIT_COMMIT: {sh: git log -n 1 --format=%h}
 
 tasks:
@@ -16,7 +16,7 @@ tasks:
     deps: [create_s3, post_lambda]
     cmds:
     - terraform init
-    - terraform apply -var git_hash={{.GIT_COMMIT}} -auto-approve 
+    - terraform apply -var s3_bucket={{.BUCKET_NAME}} -var git_hash={{.GIT_COMMIT}} -auto-approve 
 
   create_s3:
     desc: Create a s3 bucket
