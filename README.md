@@ -8,7 +8,8 @@ This project was created to provide an example on how to setup a CI pipeline to 
 * terraform - https://learn.hashicorp.com/terraform/getting-started/install.html
 * aws-cli - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html 
 
-# Getting started
+## Getting started
+
 * Ensure you're an admin in the AWS account and install the dependencies following their respective install docs.
 * The taskfile.yml contains the execution bits. The list of targets can be found with `task --list`
 ```
