@@ -1,6 +1,7 @@
 # Example lambda project
 
 This project was created to provide an example on how to setup a CI pipeline to build, test, deploy a simple lambda function in AWS. It was built on osx and has some dependencies to get started.
+
 * AWS account
 * go-task - https://taskfile.dev/#/installation
 * docker - https://docs.docker.com/install
